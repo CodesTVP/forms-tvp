@@ -29,7 +29,7 @@ function ListForms(props) {
     const embed = (form) => {
         const formId = form.id
         const stringIframe = `<iframe width="100%" height="550px" frameborder="none" src="${
-            window.location.href + '/#/form/' + formId
+            'https://codestvp.github.io/forms-tvp/#/form/' + formId
         }" id="${formId}"></iframe>`
         const stringScript = `<script>function receive(event){const brokenData=event.data?.toString()?.split(' ');if(brokenData.length===2){const [action,value]=[brokenData[0],brokenData[1]];if(action==='set-iframe-form-height'){document.getElementById('${formId}').height=(parseInt(value)+60)+'px';}}};window.addEventListener("message",receive);</script>`
         const code = stringIframe + stringScript
