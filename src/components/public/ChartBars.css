@@ -1,0 +1,21 @@
+.bar {
+    height: 10px;
+    position: relative;
+    border-radius: 0px 3px 3px 0px;
+    min-width: 2px;
+}
+
+.info {
+    padding: 2px 5px;
+    color: black;
+    font-size: 14px;
+}
+
+.percentage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 2px 5px;
+    color: white;
+    font-size: 14px;
+}
