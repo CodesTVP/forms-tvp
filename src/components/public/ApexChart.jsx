@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import React, { Component } from 'react'
 import ReactApexChart from 'react-apexcharts'
 import './ApexChart.css'
 
@@ -28,6 +28,37 @@ class ApexChart extends Component {
                     },
                 ],
             },
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (
+            prevProps.series !== this.props.series ||
+            prevProps.labels !== this.props.labels
+        ) {
+            this.setState({
+                series: this.props.series,
+                options: {
+                    chart: {
+                        width: 380,
+                        type: 'pie',
+                    },
+                    labels: this.props.labels,
+                    responsive: [
+                        {
+                            breakpoint: 480,
+                            options: {
+                                chart: {
+                                    width: 200,
+                                },
+                                legend: {
+                                    position: 'bottom',
+                                },
+                            },
+                        },
+                    ],
+                },
+            })
         }
     }
 
