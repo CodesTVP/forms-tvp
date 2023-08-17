@@ -31,7 +31,7 @@ import {
     setDoc,
     updateDoc,
 } from 'firebase/firestore'
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
+import { getDownloadURL, ref, uploadString } from 'firebase/storage'
 import { useContext, useEffect, useState } from 'react'
 import { FormContext } from '../../contexts/FormContext'
 import { FormVisibleContext } from '../../contexts/FormVisibleContext'
@@ -49,37 +49,20 @@ function FormEdite(props) {
     const addOption = () => {
         if (newOptionFile) {
             const storageRef = ref(storage, `options/${newOptionFile.name}`)
-            const uploadTask = uploadBytesResumable(storageRef, newOptionFile)
-            uploadTask.on(
-                'state_changed',
-                (snapshot) => {
-                    const progress =
-                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                    console.log('Upload is ' + progress + '% done')
-                    switch (snapshot.state) {
-                        case 'paused':
-                            console.log('Upload is paused')
-                            break
-                        case 'running':
-                            console.log('Upload is running')
-                            break
-                        default:
-                            console.log('Upload is unknown')
-                    }
-                },
-                (error) => {
-                    alert(error.message)
-                },
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then(
-                        (downloadURL) => {
+            compressImage(newOptionFile).then((base64) => {
+                uploadString(storageRef, base64, 'data_url').then(
+                    (response) => {
+                        getDownloadURL(response.ref).then((downloadURL) => {
                             console.log('File available at', downloadURL)
-                            saveOption({ value: newOption, image: downloadURL })
+                            saveOption({
+                                value: newOption,
+                                image: downloadURL,
+                            })
                             setNewOptionFile(null)
-                        }
-                    )
-                }
-            )
+                        })
+                    }
+                )
+            })
         } else {
             saveOption({ value: newOption, image: null })
         }
@@ -98,6 +81,25 @@ function FormEdite(props) {
                 })
             })
         }
+    }
+
+    const compressImage = (file) => {
+        return new Promise((resolve, reject) => {
+            var image = new Image()
+            image.src = URL.createObjectURL(file)
+            image.onload = function () {
+                var canvas = document.createElement('canvas')
+                var ctx = canvas.getContext('2d')
+                var width = 100
+                var height = image.height * (width / image.width)
+                canvas.width = width
+                canvas.height = height
+                ctx.drawImage(image, 0, 0, width, height)
+                var dataUrl = canvas.toDataURL('image/jpeg', 0.5)
+                console.log(dataUrl)
+                resolve(dataUrl)
+            }
+        })
     }
 
     const removeOption = (value) => {
@@ -309,6 +311,7 @@ function FormEdite(props) {
                                     onChange={(e) =>
                                         setNewOptionFile(e.target.files[0])
                                     }
+                                    accept='image/*'
                                 />
                             </IconButton>
                         </Tooltip>

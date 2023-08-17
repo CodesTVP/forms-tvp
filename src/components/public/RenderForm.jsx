@@ -212,6 +212,7 @@ function RenderForm(props) {
                                         {activeForm.options.map((opt) => (
                                             <>
                                                 <FormControlLabel
+                                                    sx={{ marginBottom: '8px' }}
                                                     key={
                                                         typeof opt === 'string'
                                                             ? opt
@@ -228,7 +229,7 @@ function RenderForm(props) {
                                                             sx={{
                                                                 display: 'flex',
                                                                 alignItems:
-                                                                    'center',
+                                                                    'flex-end',
                                                             }}
                                                         >
                                                             {opt.image && (
@@ -238,8 +239,8 @@ function RenderForm(props) {
                                                                     }
                                                                     alt='Avatar'
                                                                     sx={{
-                                                                        width: 25,
-                                                                        height: 25,
+                                                                        width: 35,
+                                                                        height: 35,
                                                                         borderRadius:
                                                                             '5px',
                                                                         marginRight:
