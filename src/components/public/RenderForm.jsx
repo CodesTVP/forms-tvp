@@ -1,4 +1,5 @@
 import {
+    Avatar,
     Box,
     Button,
     Card,
@@ -18,8 +19,8 @@ import {
     updateDoc,
 } from 'firebase/firestore'
 import { useContext, useEffect, useState } from 'react'
+import LogoLoading from '../../assets/loading.gif'
 import { ActiveFormContext } from '../../contexts/ActiveFormContext'
-import { LoadingContext } from '../../contexts/LoadingContext'
 import { db } from '../../firebase'
 import useAuth from '../hooks/useAuth'
 import ApexChart from './ApexChart'
@@ -32,7 +33,7 @@ function RenderForm(props) {
     const [isLogged, setIsLogged] = useState(true)
     const { activeForm } = useContext(ActiveFormContext)
     const { user, login, logout, addListener } = useAuth()
-    const { setIsLoading } = useContext(LoadingContext)
+    const [isLoading, setIsLoading] = useState(false)
 
     const sendResp = () => {
         if (!Boolean(optionSelected)) {
@@ -109,6 +110,27 @@ function RenderForm(props) {
 
     return (
         <Container>
+            {isLoading && (
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100vh',
+                        margin: 0,
+                    }}
+                >
+                    <img
+                        src={LogoLoading}
+                        alt='Animação carregando'
+                        height={150}
+                        width={150}
+                    />
+
+                    <Typography variant='subtitle1'>Carregando...</Typography>
+                </Box>
+            )}
             <Container
                 style={{ maxWidth: '500px' }}
                 className='p-0'
@@ -188,12 +210,53 @@ function RenderForm(props) {
                                         }
                                     >
                                         {activeForm.options.map((opt) => (
-                                            <FormControlLabel
-                                                key={opt}
-                                                value={opt}
-                                                control={<Radio />}
-                                                label={opt}
-                                            />
+                                            <>
+                                                <FormControlLabel
+                                                    key={
+                                                        typeof opt === 'string'
+                                                            ? opt
+                                                            : opt.value
+                                                    }
+                                                    value={
+                                                        typeof opt === 'string'
+                                                            ? opt
+                                                            : opt.value
+                                                    }
+                                                    control={<Radio />}
+                                                    label={
+                                                        <Box
+                                                            sx={{
+                                                                display: 'flex',
+                                                                alignItems:
+                                                                    'center',
+                                                            }}
+                                                        >
+                                                            {opt.image && (
+                                                                <Avatar
+                                                                    src={
+                                                                        opt.image
+                                                                    }
+                                                                    alt='Avatar'
+                                                                    sx={{
+                                                                        width: 25,
+                                                                        height: 25,
+                                                                        borderRadius:
+                                                                            '5px',
+                                                                        marginRight:
+                                                                            '8px',
+                                                                    }}
+                                                                />
+                                                            )}
+                                                            <Typography variant='body1'>
+                                                                {typeof opt ===
+                                                                'string'
+                                                                    ? opt
+                                                                    : opt.value}
+                                                            </Typography>
+                                                        </Box>
+                                                    }
+                                                />
+                                            </>
                                         ))}
                                     </RadioGroup>
                                 </FormControl>

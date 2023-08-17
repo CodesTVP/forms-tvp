@@ -3,6 +3,7 @@ import {
     AddRounded,
     ArrowDropDownRounded,
     ArrowDropUpRounded,
+    CloudUploadRounded,
     DeleteRounded,
     PublishRounded,
 } from '@mui/icons-material'
@@ -30,10 +31,11 @@ import {
     setDoc,
     updateDoc,
 } from 'firebase/firestore'
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
 import { useContext, useEffect, useState } from 'react'
 import { FormContext } from '../../contexts/FormContext'
 import { FormVisibleContext } from '../../contexts/FormVisibleContext'
-import { db } from '../../firebase'
+import { db, storage } from '../../firebase'
 
 function FormEdite(props) {
     const { setFormVisible } = useContext(FormVisibleContext)
@@ -41,21 +43,61 @@ function FormEdite(props) {
     const [formTitle, setFormTitle] = useState(form.title)
     const [formDescription, setFormDescription] = useState(form.description)
     const [newOption, setNewOption] = useState('')
+    const [newOptionFile, setNewOptionFile] = useState(null)
     const [formRef, setFormRef] = useState()
 
     const addOption = () => {
-        updateDoc(formRef, {
-            options: arrayUnion(newOption),
-        }).then(() => {
-            const docRef = doc(
-                db,
-                `forms/${form.id}/resps`,
-                transformString(newOption)
+        if (newOptionFile) {
+            const storageRef = ref(storage, `options/${newOptionFile.name}`)
+            const uploadTask = uploadBytesResumable(storageRef, newOptionFile)
+            uploadTask.on(
+                'state_changed',
+                (snapshot) => {
+                    const progress =
+                        (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                    console.log('Upload is ' + progress + '% done')
+                    switch (snapshot.state) {
+                        case 'paused':
+                            console.log('Upload is paused')
+                            break
+                        case 'running':
+                            console.log('Upload is running')
+                            break
+                        default:
+                            console.log('Upload is unknown')
+                    }
+                },
+                (error) => {
+                    alert(error.message)
+                },
+                () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then(
+                        (downloadURL) => {
+                            console.log('File available at', downloadURL)
+                            saveOption({ value: newOption, image: downloadURL })
+                            setNewOptionFile(null)
+                        }
+                    )
+                }
             )
-            setDoc(docRef, { value: newOption, votes: 0 }).then(() => {
-                setNewOption('')
+        } else {
+            saveOption({ value: newOption, image: null })
+        }
+
+        function saveOption(option) {
+            updateDoc(formRef, {
+                options: arrayUnion(option),
+            }).then(() => {
+                const docRef = doc(
+                    db,
+                    `forms/${form.id}/resps`,
+                    transformString(newOption)
+                )
+                setDoc(docRef, { value: newOption, votes: 0 }).then(() => {
+                    setNewOption('')
+                })
             })
-        })
+        }
     }
 
     const removeOption = (value) => {
@@ -141,7 +183,7 @@ function FormEdite(props) {
                 component='div'
                 className='mb-3 d-flex justify-content-center'
             >
-                Editar as Opções
+                Editar a enquete {form.id}
             </Typography>
             <TextField
                 variant='outlined'
@@ -171,7 +213,9 @@ function FormEdite(props) {
                 <>
                     <List className='border rounded mb-3 p-0'>
                         {form.options.map((opt, index) => (
-                            <div key={opt}>
+                            <div
+                                key={typeof opt === 'string' ? opt : opt.value}
+                            >
                                 <ListItem
                                     secondaryAction={
                                         <ButtonGroup
@@ -221,7 +265,13 @@ function FormEdite(props) {
                                         </ButtonGroup>
                                     }
                                 >
-                                    <ListItemText primary={opt} />
+                                    <ListItemText
+                                        primary={
+                                            typeof opt === 'string'
+                                                ? opt
+                                                : opt.value
+                                        }
+                                    />
                                 </ListItem>
                                 {index < form.options.length - 1 ? (
                                     <Divider />
@@ -234,38 +284,68 @@ function FormEdite(props) {
                             display: 'flex',
                         }}
                     >
+                        <Tooltip title='Carregar a imagem da opção'>
+                            <IconButton
+                                sx={{
+                                    borderRadius: '4px 0px 0px 4px',
+                                    borderWidth: '1px 0px 1px 1px',
+                                    borderStyle: 'solid',
+                                    borderColor: '#c4c4c4',
+                                    '&:hover': {
+                                        borderWidth: '1px',
+                                        borderColor: '#000000',
+                                    },
+                                    '&:active': {
+                                        borderWidth: '2px',
+                                        borderColor: '#1976d2',
+                                    },
+                                }}
+                                component='label'
+                            >
+                                <CloudUploadRounded />
+                                <input
+                                    type='file'
+                                    hidden
+                                    onChange={(e) =>
+                                        setNewOptionFile(e.target.files[0])
+                                    }
+                                />
+                            </IconButton>
+                        </Tooltip>
                         <TextField
                             sx={{
                                 '& .MuiInputBase-root': {
-                                    borderRadius: '4px 0px 0px 4px',
+                                    borderRadius: '0px',
                                 },
                             }}
                             fullWidth
                             variant='outlined'
-                            label='Adicionar opção:'
+                            label='Escreva uma nova opção:'
                             size='small'
                             value={newOption}
                             onChange={(e) => setNewOption(e.target.value)}
                         />
-                        <IconButton
-                            onClick={addOption}
-                            sx={{
-                                borderRadius: '0px 4px 4px 0px',
-                                borderWidth: '1px 1px 1px 0px',
-                                borderStyle: 'solid',
-                                borderColor: '#c4c4c4',
-                                '&:hover': {
-                                    borderWidth: '1px',
-                                    borderColor: '#000000',
-                                },
-                                '&:active': {
-                                    borderWidth: '2px',
-                                    borderColor: '#1976d2',
-                                },
-                            }}
-                        >
-                            <Add />
-                        </IconButton>
+                        <Tooltip title='Adicionar nova opção'>
+                            <IconButton
+                                onClick={addOption}
+                                sx={{
+                                    borderRadius: '0px 4px 4px 0px',
+                                    borderWidth: '1px 1px 1px 0px',
+                                    borderStyle: 'solid',
+                                    borderColor: '#c4c4c4',
+                                    '&:hover': {
+                                        borderWidth: '1px',
+                                        borderColor: '#000000',
+                                    },
+                                    '&:active': {
+                                        borderWidth: '2px',
+                                        borderColor: '#1976d2',
+                                    },
+                                }}
+                            >
+                                <Add />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                 </>
             )}

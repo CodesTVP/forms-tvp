@@ -5,11 +5,10 @@ import { Outlet, useParams } from 'react-router'
 import Loading from '../components/public/Loading'
 import Page404 from '../components/public/Page404'
 import { ActiveFormContext } from '../contexts/ActiveFormContext'
-import { LoadingContext } from '../contexts/LoadingContext'
 import { db } from '../firebase'
 
 function Public() {
-    const { isLoading, setIsLoading } = useContext(LoadingContext)
+    const [isLoading, setIsLoading] = useState(true)
     const [formExists, setFormExists] = useState(true)
     const { setActiveForm } = useContext(ActiveFormContext)
     const { id } = useParams()
