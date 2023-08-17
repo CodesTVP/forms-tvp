@@ -113,11 +113,15 @@ function RenderForm(props) {
             {isLoading && (
                 <Box
                     sx={{
+                        position: 'fixed',
+                        top: '0',
+                        left: '0',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        height: '100vh',
+                        width: '100%',
+                        height: '100%',
                         margin: 0,
                     }}
                 >
