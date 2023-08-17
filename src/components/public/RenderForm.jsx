@@ -124,6 +124,7 @@ function RenderForm(props) {
                         height: '100%',
                         margin: 0,
                         backgroundColor: 'white',
+                        zIndex: '999',
                     }}
                 >
                     <img
