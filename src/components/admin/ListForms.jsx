@@ -1,4 +1,5 @@
 import {
+    BlockRounded,
     ContentCopyRounded,
     DeleteRounded,
     EditRounded,
@@ -14,7 +15,14 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material'
-import { collection, deleteDoc, doc, getDocs, query } from 'firebase/firestore'
+import {
+    collection,
+    deleteDoc,
+    doc,
+    getDocs,
+    query,
+    updateDoc,
+} from 'firebase/firestore'
 import { useContext } from 'react'
 import { FormContext } from '../../contexts/FormContext'
 import { FormVisibleContext } from '../../contexts/FormVisibleContext'
@@ -47,6 +55,14 @@ function ListForms(props) {
         deleteDoc(doc(db, 'forms', form.id))
     }
 
+    const disableForm = async (form) => {
+        await updateDoc(doc(db, 'forms', form.id), { disabled: !form.disabled })
+        setForm((prev) => ({
+            ...prev,
+            disabled: !form.disabled,
+        }))
+    }
+
     return (
         <>
             <List
@@ -65,6 +81,13 @@ function ListForms(props) {
                             <CardContent>
                                 <Typography variant='h6'>
                                     {form.title}
+                                    {form.disabled ? (
+                                        <span className='text-danger ms-2'>
+                                            (Desativada)
+                                        </span>
+                                    ) : (
+                                        ''
+                                    )}
                                 </Typography>
                                 <Card
                                     className='my-2'
@@ -127,6 +150,24 @@ function ListForms(props) {
                                         orientation='vertical'
                                         flexItem
                                     />
+                                    <Tooltip
+                                        title={`${
+                                            form.disabled
+                                                ? 'Ativar'
+                                                : 'Desativar'
+                                        } enquete`}
+                                    >
+                                        <Button
+                                            color={
+                                                form.disabled
+                                                    ? 'success'
+                                                    : 'warning'
+                                            }
+                                            onClick={() => disableForm(form)}
+                                        >
+                                            <BlockRounded />
+                                        </Button>
+                                    </Tooltip>
                                     <Tooltip title='Excluir enquete'>
                                         <Button
                                             color='error'

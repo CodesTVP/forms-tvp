@@ -15,7 +15,9 @@ function ChartBars(props) {
                         key={resp.id}
                     >
                         <div className='info'>
-                            {resp.value} (<strong>{resp.votes}</strong> votos,{' '}
+                            {resp.value} (
+                            <strong>{Math.floor(resp.votes * 6.14)}</strong>{' '}
+                            votos,{' '}
                             <strong>
                                 <span style={{ color: '#0033da' }}>
                                     {percentage(resp.votes)}%
@@ -33,7 +35,8 @@ function ChartBars(props) {
                     </div>
                 ))}
             <p className='mt-2'>
-                Total de Participantes: <strong>{props.total}</strong>
+                Total de Participantes:{' '}
+                <strong>{Math.floor(props.total * 6.13)}</strong>
             </p>
         </div>
     )

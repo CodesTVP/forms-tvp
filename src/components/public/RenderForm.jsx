@@ -114,106 +114,133 @@ function RenderForm() {
                 style={{ maxWidth: '500px' }}
                 className='p-0'
             >
-                <Card
-                    elevation={4}
-                    className='mb-3 px-2'
-                >
-                    <CardContent>
-                        <Typography
-                            variant='h5'
-                            className='fw-bold'
+                {!activeForm.disabled ? (
+                    <>
+                        <Card
+                            elevation={4}
+                            className='mb-3 px-2'
                         >
-                            {activeForm.title}
-                        </Typography>
-                    </CardContent>
-                </Card>
+                            <CardContent>
+                                <Typography
+                                    variant='h5'
+                                    className='fw-bold'
+                                >
+                                    {activeForm.title}
+                                </Typography>
+                            </CardContent>
+                        </Card>
 
-                <Card
-                    elevation={4}
-                    className='mb-3 px-2'
-                >
-                    <CardContent>
-                        {userHasVoted ? (
+                        <Card
+                            elevation={4}
+                            className='mb-3 px-2'
+                        >
+                            <CardContent>
+                                {userHasVoted ? (
+                                    <Typography
+                                        variant='h5'
+                                        className='fw-bold'
+                                    >
+                                        Você já votou nessa enquete!
+                                    </Typography>
+                                ) : (
+                                    <>
+                                        <Typography
+                                            variant='h6'
+                                            className='fw-bold'
+                                        >
+                                            {activeForm.description}
+                                        </Typography>
+                                        <FormControl>
+                                            <RadioGroup
+                                                value={optionSelected}
+                                                onChange={(e) =>
+                                                    setOptionSelected(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                {activeForm.options.map(
+                                                    (opt) => (
+                                                        <FormControlLabel
+                                                            key={
+                                                                typeof opt ===
+                                                                'string'
+                                                                    ? opt
+                                                                    : opt.value
+                                                            }
+                                                            value={
+                                                                typeof opt ===
+                                                                'string'
+                                                                    ? opt
+                                                                    : opt.value
+                                                            }
+                                                            control={<Radio />}
+                                                            label={
+                                                                <Box
+                                                                    sx={{
+                                                                        display:
+                                                                            'flex',
+                                                                        alignItems:
+                                                                            'flex-end',
+                                                                    }}
+                                                                >
+                                                                    {opt.image && (
+                                                                        <Avatar
+                                                                            src={
+                                                                                opt.image
+                                                                            }
+                                                                            alt='Avatar'
+                                                                            sx={{
+                                                                                width: 35,
+                                                                                height: 35,
+                                                                                borderRadius:
+                                                                                    '5px',
+                                                                                marginRight:
+                                                                                    '8px',
+                                                                            }}
+                                                                        />
+                                                                    )}
+                                                                    <Typography variant='body1'>
+                                                                        {typeof opt ===
+                                                                        'string'
+                                                                            ? opt
+                                                                            : opt.value}
+                                                                    </Typography>
+                                                                </Box>
+                                                            }
+                                                        />
+                                                    )
+                                                )}
+                                            </RadioGroup>
+                                        </FormControl>
+                                    </>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        <Button
+                            variant='contained'
+                            disabled={!canSend || !optionSelected}
+                            onClick={sendResp}
+                        >
+                            Enviar
+                        </Button>
+                    </>
+                ) : (
+                    <Card
+                        elevation={4}
+                        className='mb-3 px-2'
+                    >
+                        <CardContent>
                             <Typography
                                 variant='h5'
                                 className='fw-bold'
                             >
-                                Você já votou nessa enquete!
+                                A votação foi encerrada!
                             </Typography>
-                        ) : (
-                            <>
-                                <Typography
-                                    variant='h6'
-                                    className='fw-bold'
-                                >
-                                    {activeForm.description}
-                                </Typography>
-                                <FormControl>
-                                    <RadioGroup
-                                        value={optionSelected}
-                                        onChange={(e) =>
-                                            setOptionSelected(e.target.value)
-                                        }
-                                    >
-                                        {activeForm.options.map((opt) => (
-                                            <FormControlLabel
-                                                key={
-                                                    typeof opt === 'string'
-                                                        ? opt
-                                                        : opt.value
-                                                }
-                                                value={
-                                                    typeof opt === 'string'
-                                                        ? opt
-                                                        : opt.value
-                                                }
-                                                control={<Radio />}
-                                                label={
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems:
-                                                                'flex-end',
-                                                        }}
-                                                    >
-                                                        {opt.image && (
-                                                            <Avatar
-                                                                src={opt.image}
-                                                                alt='Avatar'
-                                                                sx={{
-                                                                    width: 35,
-                                                                    height: 35,
-                                                                    borderRadius:
-                                                                        '5px',
-                                                                    marginRight:
-                                                                        '8px',
-                                                                }}
-                                                            />
-                                                        )}
-                                                        <Typography variant='body1'>
-                                                            {typeof opt ===
-                                                            'string'
-                                                                ? opt
-                                                                : opt.value}
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        ))}
-                                    </RadioGroup>
-                                </FormControl>
-                            </>
-                        )}
-                    </CardContent>
-                </Card>
-
-                <Button
-                    variant='contained'
-                    disabled={!canSend || !optionSelected}
-                    onClick={sendResp}
-                >
-                    Enviar
-                </Button>
+                        </CardContent>
+                    </Card>
+                )}
             </Container>
 
             {activeForm.resps.labels.length > 0 &&
